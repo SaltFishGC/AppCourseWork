@@ -28,23 +28,38 @@ public class WordRecitationWelcomeFragment extends Fragment {
     @Override
     public View onCreateView(LayoutInflater inflater, ViewGroup container, Bundle savedInstanceState) {
         View view = inflater.inflate(R.layout.fragment_word_recitation_welcome, container, false);
+
+        // 初始化视图
+        initViews(view);
         
+        // 初始化数据库
+        dbHelper = new SqliteConnection(requireContext());
+        learningRecordDao = new WordLearningRecordDao(dbHelper);
+
+        // 设置点击事件
+        setupClickListeners();
+        
+        // 显示今天的统计信息
+        updateTodayStats();
+        
+        return view;
+    }
+
+    private void initViews(View view) {
         // 初始化视图
         calendarView = view.findViewById(R.id.calendar_view);
         todayStats = view.findViewById(R.id.today_stats);
         totalStats = view.findViewById(R.id.total_stats);
         startButton = view.findViewById(R.id.start_button);
         unlimitedModeButton = view.findViewById(R.id.unlimited_mode_button);
-        
-        // 初始化数据库
-        dbHelper = new SqliteConnection(requireContext());
-        learningRecordDao = new WordLearningRecordDao(dbHelper);
-        
+    }
+
+    private void setupClickListeners() {
         // 设置日历点击事件
         calendarView.setOnDateChangeListener((view1, year, month, dayOfMonth) -> {
             updateStatsForDate(year, month, dayOfMonth);
         });
-        
+
         // 设置开始按钮点击事件
         startButton.setOnClickListener(v -> {
             // 跳转到背诵页面
@@ -53,7 +68,7 @@ public class WordRecitationWelcomeFragment extends Fragment {
             transaction.addToBackStack(null);
             transaction.commit();
         });
-        
+
         // 设置无限背诵按钮点击事件
         unlimitedModeButton.setOnClickListener(v -> {
             // 跳转到无限背诵页面
@@ -62,11 +77,6 @@ public class WordRecitationWelcomeFragment extends Fragment {
             transaction.addToBackStack(null);
             transaction.commit();
         });
-        
-        // 显示今天的统计信息
-        updateTodayStats();
-        
-        return view;
     }
     
     private void updateTodayStats() {

@@ -1,5 +1,6 @@
 package com.example.myapp.wordFragment;
 
+import android.graphics.Typeface;
 import android.os.Bundle;
 import android.view.LayoutInflater;
 import android.view.View;
@@ -32,6 +33,10 @@ public class WordRecitationUnlimitedFragment extends Fragment {
     private Button btnRemembered;
     private MaterialButton btnEnd;
 
+    // 新增遮挡词义的变量
+    private TextView definitionMaskText;  // 用于遮挡词义的文本
+    private boolean isDefinitionVisible = false;  // 是否已显示词义
+
     private WordDao wordDao;
     private WordLearningRecordDao learningRecordDao;
     private Word currentWord;
@@ -43,7 +48,10 @@ public class WordRecitationUnlimitedFragment extends Fragment {
         
         // 初始化视图
         initViews(view);
-        
+
+        // 创建遮挡词义
+        setupDefinitionMask(view);
+
         // 初始化数据库
         SqliteConnection dbHelper = new SqliteConnection(requireContext());
         wordDao = new WordDao(dbHelper);
@@ -70,18 +78,57 @@ public class WordRecitationUnlimitedFragment extends Fragment {
         btnEnd = view.findViewById(R.id.btn_end);
     }
 
-    private void loadNextWord() {
-        // 获取一个未记住的单词
-        currentWord = wordDao.getRandomUnrememberedWord();
-        updateWordDisplay();
-    }
-
     private void setupButtonListeners() {
         btnNeverSeen.setOnClickListener(v -> handleWordResponse(0));
         btnForgot.setOnClickListener(v -> handleWordResponse(1));
         btnRemembered.setOnClickListener(v -> handleWordResponse(2));
         btnEnd.setOnClickListener(v -> returnToWelcomeFragment());
     }
+
+    // 新增方法：设置词义遮挡层
+    private void setupDefinitionMask(View view) {
+        // 创建用于遮挡的 TextView
+        definitionMaskText = new TextView(requireContext());
+        definitionMaskText.setText("点击以显示词义");
+        definitionMaskText.setTextSize(18);
+        definitionMaskText.setTypeface(Typeface.DEFAULT_BOLD);
+        definitionMaskText.setGravity(android.view.Gravity.CENTER);
+        definitionMaskText.setBackgroundColor(getResources().getColor(android.R.color.white));
+        definitionMaskText.setTextColor(getResources().getColor(android.R.color.darker_gray));
+
+        // 设置 LayoutParams，使其填满 answer 布局
+        ViewGroup parent = view.findViewById(R.id.answer);
+        ViewGroup.LayoutParams params = new ViewGroup.LayoutParams(
+                ViewGroup.LayoutParams.MATCH_PARENT,
+                ViewGroup.LayoutParams.MATCH_PARENT
+        );
+        definitionMaskText.setLayoutParams(params);
+
+        parent.addView(definitionMaskText, 0); // 插入到最上层
+
+        // 设置点击事件
+        definitionMaskText.setOnClickListener(v -> toggleDefinitionVisibility());
+    }
+
+    // 切换词义显示状态的方法
+    private void toggleDefinitionVisibility() {
+        isDefinitionVisible = !isDefinitionVisible;
+        definitionMaskText.setVisibility(isDefinitionVisible ? View.GONE : View.VISIBLE);
+
+        // 显示或隐藏 answer 区域中的各个组件
+        int visibility = isDefinitionVisible ? View.VISIBLE : View.GONE;
+        definitionText.setVisibility(visibility);
+        variantText.setVisibility(visibility);
+        topicText.setVisibility(visibility);
+    }
+
+    private void loadNextWord() {
+        // 获取一个未记住的单词
+        currentWord = wordDao.getRandomUnrememberedWord();
+        updateWordDisplay();
+    }
+
+
 
     private void handleWordResponse(int response) {
         if (currentWord != null) {
@@ -97,16 +144,27 @@ public class WordRecitationUnlimitedFragment extends Fragment {
                     break;
             }
             loadNextWord();
+            toggleDefinitionVisibility();
         }
     }
 
     private void updateWordDisplay() {
         if (currentWord != null) {
             wordText.setText(currentWord.getWord());
+
+            // 更新词义等字段，但保持隐藏状态
             definitionText.setText(currentWord.getDefinition());
             variantText.setText(currentWord.getVariant());
             topicText.setText(currentWord.getTopic());
+
             progressText.setText(String.format("已完成：%d个单词", completedWords));
+
+            // 如果词义已显示，则刷新内容；否则保持隐藏
+            if (!isDefinitionVisible) {
+                definitionText.setVisibility(View.GONE);
+                variantText.setVisibility(View.GONE);
+                topicText.setVisibility(View.GONE);
+            }
         }
     }
 

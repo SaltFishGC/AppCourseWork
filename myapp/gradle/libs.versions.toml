@@ -1,0 +1,23 @@
+[versions]
+android-build-gradle = "8.3.0"
+androidx-appcompat = "1.6.1"
+material = "1.9.0"
+androidx-core-ktx = "1.10.1"
+androidx-constraintlayout = "2.1.4"
+androidx-lottie = "3.4.2"
+androidx-junit = "1.1.5"
+espresso-core = "3.5.1"
+okhttp = "4.12.0"  # 添加OkHttp版本定义
+
+[libraries]
+android-plugins = { module = "com.android.tools.build:gradle", version.ref = "android-build-gradle" }
+appcompat = { group = "androidx.appcompat", name = "appcompat", version.ref = "androidx-appcompat" }
+material = { group = "com.google.android.material", name = "material", version.ref = "material" }
+core-ktx = { group = "androidx.core", name = "core-ktx", version.ref = "androidx-core-ktx" }
+constraintlayout = { group = "androidx.constraintlayout", name = "constraintlayout", version.ref = "androidx-constraintlayout" }
+lottie = { group = "com.airbnb.android", name = "lottie", version.ref = "androidx-lottie" }
+junit = { group = "junit", name = "junit", version.ref = "androidx-junit" }
+ext-junit = { group = "androidx.test.ext", name = "junit", version.ref = "androidx-junit" }
+espresso-core = { group = "androidx.test.espresso", name = "espresso-core", version.ref = "espresso-core" }
+
+okhttp = { group = "com.squareup.okhttp3", name = "okhttp", version.ref = "okhttp" }

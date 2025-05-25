@@ -1,0 +1,9 @@
+<resources>
+    <string name="app_name">考研助手</string>
+    <string name="quick_start">快速开始</string>
+    <string name="start_session">开始会话</string>
+    <string name="start_recitation">开始背诵</string>
+    <string name="today_progress">10个单词</string>
+    <string name="server_ip">10.0.120.184</string>
+    <string name="server_port">8080</string>
+</resources>

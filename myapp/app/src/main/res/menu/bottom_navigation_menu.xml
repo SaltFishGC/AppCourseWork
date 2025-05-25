@@ -1,0 +1,15 @@
+<?xml version="1.0" encoding="utf-8"?>
+<menu xmlns:android="http://schemas.android.com/apk/res/android">
+    <item
+        android:id="@+id/nav_word_recitation"
+        android:icon="@drawable/ic_book"
+        android:title="单词背诵" />
+    <item
+        android:id="@+id/nav_focus_mode"
+        android:icon="@drawable/ic_timer"
+        android:title="学习时长" />
+    <item
+        android:id="@+id/nav_community"
+        android:icon="@drawable/ic_people"
+        android:title="社区" />
+</menu> 

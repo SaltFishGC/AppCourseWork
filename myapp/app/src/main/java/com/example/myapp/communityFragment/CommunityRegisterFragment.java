@@ -15,6 +15,7 @@ import android.widget.Toast;
 
 import com.example.myapp.R;
 import com.example.myapp.connect.ConnectSet;
+import com.example.myapp.dto.MyResponse;
 import com.google.android.material.button.MaterialButton;
 import com.google.android.material.textfield.TextInputEditText;
 import com.google.gson.Gson;
@@ -27,7 +28,6 @@ import java.io.IOException;
 
 import okhttp3.Call;
 import okhttp3.Callback;
-import okhttp3.FormBody;
 import okhttp3.MediaType;
 import okhttp3.OkHttpClient;
 import okhttp3.Request;
@@ -45,17 +45,22 @@ public class CommunityRegisterFragment extends Fragment {
     public View onCreateView(LayoutInflater inflater, ViewGroup container,
                              Bundle savedInstanceState) {
         View  view = inflater.inflate(R.layout.fragment_community_register, container, false);
-
+        // 获取服务器地址和端口
         serverIp= ConnectSet.getServerIp(getContext());
         serverPort=ConnectSet.getServerPort(getContext());
+        // 初始化控件
+        initViews(view);
+        // 设置注册按钮的点击事件
+        setUpRegisterButton();
+
+        return view;
+    }
+
+    private void initViews(View view) {
         usenameText  = view.findViewById(R.id.username_register_input);
         passwordText = view.findViewById(R.id.password_register_input);
         passwordAgainText = view.findViewById(R.id.password_register_again_input);
         registerButton  = view.findViewById(R.id.btn_register_now);
-
-        setUpRegisterButton();
-
-        return view;
     }
 
     public void setUpRegisterButton(){

@@ -6,7 +6,9 @@
     <color name="accent_dark">#F50057</color>
     <color name="black">#FF000000</color>
     <color name="white">#FFFFFFFF</color>
+    <color name="grey">#9E9E9E</color>
     <color name="primaryContainer">#FFE0B3</color>
     <color name="surfaceContainerHigh">#EAE7EC</color>
     <color name="surfaceContainerHighest">#DAD7DC</color>
+
 </resources>

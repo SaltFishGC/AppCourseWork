@@ -83,11 +83,24 @@ public class FocusModeFragment extends Fragment {
     @Override
     public View onCreateView(LayoutInflater inflater, ViewGroup container, Bundle savedInstanceState) {
         View view = inflater.inflate(R.layout.fragment_focus_mode, container, false);
-        
+
+        //  初始化视图
+        initViews(view);
+
         // 初始化数据库
         timeLearnedDao = new TimeLearnedDao(requireContext());
         timeLearnedDao.open();
+
+        // 更新总专注时长显示
+        updateTotalFocusTimeDisplay();
+
+        // 设置监听器
+        setupListener();
         
+        return view;
+    }
+
+    private void initViews(View view) {
         // 初始化视图
         timerText = view.findViewById(R.id.timer_text);
         startButton = view.findViewById(R.id.start_button);
@@ -97,10 +110,9 @@ public class FocusModeFragment extends Fragment {
         durationText = view.findViewById(R.id.duration_text);
         silentSwitch = view.findViewById(R.id.silent_switch);
         totalFocusTimeText = view.findViewById(R.id.total_focus_time_text);
-        
-        // 更新总专注时长显示
-        updateTotalFocusTimeDisplay();
-        
+    }
+
+    private void setupListener() {
         // 设置滑块监听
         durationSlider.addOnChangeListener((slider, value, fromUser) -> {
             int minutes = (int) value;
@@ -109,17 +121,15 @@ public class FocusModeFragment extends Fragment {
                 updateTimerDisplay(minutes * 60);
             }
         });
-        
+
         // 设置开始按钮点击事件
         startButton.setOnClickListener(v -> startFocusMode());
-        
+
         // 设置停止按钮点击事件
         stopButton.setOnClickListener(v -> stopFocusMode());
-        
+
         // 设置模式切换按钮点击事件
         modeSwitchButton.setOnClickListener(v -> switchMode());
-        
-        return view;
     }
 
     private void startFocusMode() {

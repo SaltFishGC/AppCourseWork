@@ -12,9 +12,9 @@ import androidx.fragment.app.FragmentTransaction;
 
 import com.example.myapp.R;
 import com.example.myapp.connect.ConnectSet;
+import com.example.myapp.dto.MyResponse;
 import com.google.android.material.button.MaterialButton;
 import com.google.android.material.textfield.TextInputEditText;
-import com.google.android.material.textfield.TextInputLayout;
 import com.google.gson.Gson;
 import com.google.gson.reflect.TypeToken;
 
@@ -23,7 +23,7 @@ import okhttp3.Callback;
 import okhttp3.FormBody;
 import okhttp3.OkHttpClient;
 import okhttp3.Request;
-import okhttp3.Response;
+
 import java.io.IOException;
 
 public class CommunityFragment extends Fragment {
@@ -41,21 +41,33 @@ public class CommunityFragment extends Fragment {
     public View onCreateView(LayoutInflater inflater, ViewGroup container, Bundle savedInstanceState) {
         View view = inflater.inflate(R.layout.fragment_community, container, false);
 
+        // 初始化控件
+        initViews(view);
+
+        // 获取服务器地址和端口
         serverIp=ConnectSet.getServerIp(getContext());
         serverPort=ConnectSet.getServerPort(getContext());
+
+        // 设置监听器
+        setupListeners();
+
+        return view;
+    }
+
+    private void initViews(View view) {
         usernameText= view.findViewById(R.id.username_input);
         passwordText= view.findViewById(R.id.password_input);
         loginButton= view.findViewById(R.id.btn_login);
         registerButton= view.findViewById(R.id.btn_register);
+        settingsButton = view.findViewById(R.id.btn_settings);
+    }
 
+    private void setupListeners() {
         setupLoginButton();
         setupRegisterButton();
-        settingsButton = view.findViewById(R.id.btn_settings);
         settingsButton.setOnClickListener(v -> showServerSettingsDialog());
-
-
-        return view;
     }
+
     private void showServerSettingsDialog() {
         Context context = getContext();
         if (context == null) return;

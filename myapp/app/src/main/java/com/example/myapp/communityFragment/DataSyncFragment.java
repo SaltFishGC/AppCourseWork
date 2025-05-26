@@ -18,17 +18,15 @@ import com.example.myapp.dao.SqliteConnection;
 import com.example.myapp.dao.TimeLearnedDao;
 import com.example.myapp.dao.WordDao;
 import com.example.myapp.dao.WordLearningRecordDao;
+import com.example.myapp.dto.MyResponse;
 import com.example.myapp.dto.TimeLearnedWithUseridDTO;
 import com.example.myapp.dto.WordLearningRecordWithUseridDTO;
-import com.example.myapp.entity.WordLearningRecord;
-import com.example.myapp.wordFragment.WordRecitationWelcomeFragment;
 import com.google.gson.Gson;
 import com.google.gson.GsonBuilder;
 import com.google.gson.reflect.TypeToken;
 
 import okhttp3.*;
 import java.io.IOException;
-import java.util.ArrayList;
 import java.util.Date;
 import java.util.List;
 
@@ -45,22 +43,38 @@ public class DataSyncFragment extends Fragment {
     @Override
     public View onCreateView(LayoutInflater inflater, ViewGroup container, Bundle savedInstanceState) {
         View view = inflater.inflate(R.layout.fragment_data_sync, container, false);
+        // 获取所需信息
         userId = loadUserId();
-        btnUpload = view.findViewById(R.id.btn_upload);
-        btnSync = view.findViewById(R.id.btn_sync);
-        btnQuit = view.findViewById(R.id.btn_quit);
         serverIp = ConnectSet.getServerIp(requireContext());
         serverPort=ConnectSet.getServerPort(requireContext());
+
+        // 初始化视图
+        initViews(view);
+
+        // 初始化数据库和DAO
         SqliteConnection dbHelper = new SqliteConnection(requireContext());
         wordLearningRecordDao = new WordLearningRecordDao(dbHelper);
         timeLearnedDao = new TimeLearnedDao(getContext());
         wordDao = new WordDao(dbHelper);
 
+        // 设置按钮点击事件
+        setupListeners();
+
+        return view;
+    }
+
+    private void initViews(View view){
+        btnUpload = view.findViewById(R.id.btn_upload);
+        btnSync = view.findViewById(R.id.btn_sync);
+        btnQuit = view.findViewById(R.id.btn_quit);
+    }
+
+    private void setupListeners() {
         setupUploadButton();
         setupSyncButton();
         setupQuitButton();
-        return view;
     }
+
     // 退出按钮
     public void setupQuitButton() {
         btnQuit.setOnClickListener(v -> {

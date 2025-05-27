@@ -25,8 +25,10 @@ import android.widget.Toast;
 
 import androidx.appcompat.app.AlertDialog;
 import androidx.fragment.app.Fragment;
+import androidx.lifecycle.ViewModelProvider;
 
 import com.airbnb.lottie.LottieDrawable;
+import com.example.myapp.model.SharedViewModel;
 import com.google.android.material.button.MaterialButton;
 import com.google.android.material.slider.Slider;
 import com.google.android.material.switchmaterial.SwitchMaterial;
@@ -277,7 +279,7 @@ public class FocusModeFragment extends Fragment {
         timerText.setText(String.format("%02d:%02d", minutes, remainingSeconds));
     }
 
-    private void updateTotalFocusTimeDisplay() {
+    public void updateTotalFocusTimeDisplay() {
         double totalMinutes = timeLearnedDao.getTotalTimeLearned();
         int hours = (int) (totalMinutes / 60);
         int minutes = (int) (totalMinutes % 60);

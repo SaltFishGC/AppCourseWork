@@ -109,7 +109,6 @@ public class WordDao {
 
             db.update(TABLE_NAME, values, whereClause, whereArgs);
         }
-        db.close();
     }
     /**
      * 根据id获取单词

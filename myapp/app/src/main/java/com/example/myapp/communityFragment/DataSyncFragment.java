@@ -11,6 +11,8 @@ import android.widget.Toast;
 
 import androidx.annotation.NonNull;
 import androidx.fragment.app.Fragment;
+import androidx.lifecycle.ViewModelProvider;
+
 import com.example.myapp.R;
 import com.example.myapp.adapter.FlexibleDateTypeAdapter;
 import com.example.myapp.connect.ConnectSet;
@@ -21,6 +23,10 @@ import com.example.myapp.dao.WordLearningRecordDao;
 import com.example.myapp.dto.MyResponse;
 import com.example.myapp.dto.TimeLearnedWithUseridDTO;
 import com.example.myapp.dto.WordLearningRecordWithUseridDTO;
+import com.example.myapp.focusFragment.FocusModeFragment;
+import com.example.myapp.model.SharedViewModel;
+import com.example.myapp.wordFragment.WordRecitationFragment;
+import com.example.myapp.wordFragment.WordRecitationWelcomeFragment;
 import com.google.gson.Gson;
 import com.google.gson.GsonBuilder;
 import com.google.gson.reflect.TypeToken;
@@ -118,9 +124,9 @@ public class DataSyncFragment extends Fragment {
             public void onResponse(Call call, Response response) throws IOException {
                 requireActivity().runOnUiThread(() -> {
                     if (response.isSuccessful()) {
-                        Toast.makeText(getContext(), "数据删除成功", Toast.LENGTH_SHORT).show();
+                        Toast.makeText(getContext(), "服务器单词背诵数据删除成功", Toast.LENGTH_SHORT).show();
                     } else {
-                        Toast.makeText(getContext(), "删除失败: " + response.message(), Toast.LENGTH_SHORT).show();
+                        Toast.makeText(getContext(), "服务器单词背诵数据删除失败: " + response.message(), Toast.LENGTH_SHORT).show();
                     }
                 });
             }
@@ -142,9 +148,9 @@ public class DataSyncFragment extends Fragment {
             public void onResponse(Call call, Response response) throws IOException {
                 requireActivity().runOnUiThread(() -> {
                     if (response.isSuccessful()) {
-                        Toast.makeText(getContext(), "数据删除成功", Toast.LENGTH_SHORT).show();
+                        Toast.makeText(getContext(), "服务器专注时长数据删除成功", Toast.LENGTH_SHORT).show();
                     } else {
-                        Toast.makeText(getContext(), "删除失败: " + response.message(), Toast.LENGTH_SHORT).show();
+                        Toast.makeText(getContext(), "服务器专注时长数据删除失败: " + response.message(), Toast.LENGTH_SHORT).show();
                     }
                 });
             }
@@ -170,24 +176,22 @@ public class DataSyncFragment extends Fragment {
         client.newCall(request).enqueue(new Callback() {
             @Override
             public void onResponse(@NonNull Call call, @NonNull Response response) throws IOException {
-                requireActivity().runOnUiThread(() -> {
                     if (response.isSuccessful()) {
                         try {
                             String json = response.body().string();
                             Gson  gson = new Gson();
                             MyResponse<Integer> myResponse = gson.fromJson(json, new TypeToken<MyResponse<Integer>>() {}.getType());
                             if (myResponse.isSuccess()) {
-                                Toast.makeText(getContext(), "上传成功", Toast.LENGTH_SHORT).show();
+                                requireActivity().runOnUiThread(() ->Toast.makeText(getContext(), "单词背诵数据上传成功", Toast.LENGTH_SHORT).show());
                             } else {
-                                Toast.makeText(getContext(), "上传失败: " + myResponse.getMessage(), Toast.LENGTH_SHORT).show();
+                                requireActivity().runOnUiThread(() ->Toast.makeText(getContext(), "单词背诵数据上传失败: " + myResponse.getMessage(), Toast.LENGTH_SHORT).show());
                             }
                         } catch (Exception e) {
-                            Toast.makeText(getContext(), "解析失败: " + e.getMessage(), Toast.LENGTH_SHORT).show();
+                            requireActivity().runOnUiThread(() ->Toast.makeText(getContext(), "单词背诵数据解析失败: " + e.getMessage(), Toast.LENGTH_SHORT).show());
                         }
                     } else {
-                        Toast.makeText(getContext(), "上传失败: " + response.message(), Toast.LENGTH_SHORT).show();
+                        requireActivity().runOnUiThread(() ->Toast.makeText(getContext(), "单词背诵数据上传失败: " + response.message(), Toast.LENGTH_SHORT).show());
                     }
-                });
             }
 
             @Override
@@ -208,24 +212,22 @@ public class DataSyncFragment extends Fragment {
         client.newCall(request).enqueue(new Callback() {
             @Override
             public void onResponse(@NonNull Call call, @NonNull Response response) throws IOException {
-                requireActivity().runOnUiThread(() -> {
                     if (response.isSuccessful()) {
                         try {
                             String json = response.body().string();
                             Gson  gson = new Gson();
                             MyResponse<Object> myResponse = gson.fromJson(json, new TypeToken<MyResponse<Object>>() {}.getType());
                             if (myResponse.isSuccess()) {
-                                Toast.makeText(getContext(), "上传成功", Toast.LENGTH_SHORT).show();
+                                requireActivity().runOnUiThread(() ->Toast.makeText(getContext(), "专注时长数据上传成功", Toast.LENGTH_SHORT).show());
                             } else {
-                                Toast.makeText(getContext(), "上传失败: " + myResponse.getMessage(), Toast.LENGTH_SHORT).show();
+                                requireActivity().runOnUiThread(() ->Toast.makeText(getContext(), "专注时长数据上传失败: " + myResponse.getMessage(), Toast.LENGTH_SHORT).show());
                             }
                         }catch (Exception e){
-                            Toast.makeText(getContext(), "解析失败: " + e.getMessage(), Toast.LENGTH_SHORT).show();
+                            requireActivity().runOnUiThread(() ->Toast.makeText(getContext(), "专注时长数据解析失败: " + e.getMessage(), Toast.LENGTH_SHORT).show());
                         }
                     }else {
-                        Toast.makeText(getContext(), "上传失败: " + response.message(), Toast.LENGTH_SHORT).show();
+                        requireActivity().runOnUiThread(() ->Toast.makeText(getContext(), "专注时长数据上传失败: " + response.message(), Toast.LENGTH_SHORT).show());
                     }
-                });
             }
 
             @Override
@@ -265,52 +267,43 @@ public class DataSyncFragment extends Fragment {
                 requireActivity().runOnUiThread(() ->
                     Toast.makeText(getContext(), "连接失败: " + e.getMessage(), Toast.LENGTH_SHORT).show());
             }
-
             @Override
             public void onResponse(Call call, Response response) throws IOException {
-                requireActivity().runOnUiThread(() -> {
-                    if (response.isSuccessful()) {
-                        String json = null;
-                        try {
-                            json = response.body().string();
-                        } catch (IOException e) {
-                            throw new RuntimeException(e);
+                if (response.isSuccessful()) {
+                    try {
+                        final ResponseBody responseBody = response.body();
+                        if (responseBody == null) {
+                            requireActivity().runOnUiThread(() -> Toast.makeText(getContext(), "响应体为空", Toast.LENGTH_SHORT).show());
+                            return;
                         }
 
-                        try {
-                            if (response.body() == null){
-                                Toast.makeText(getContext(), "响应体为空 ", Toast.LENGTH_SHORT).show();
-                                return;
-                            }
+                        String json = responseBody.string(); // 后台线程读取
+                        MyResponse<List<WordLearningRecordWithUseridDTO>> myResponse = gson.fromJson(json, new TypeToken<MyResponse<List<WordLearningRecordWithUseridDTO>>>() {}.getType());
+                        Log.d("WordGetId", userId.toString());
+                        Log.d("WordResponse", json);
 
-                            Log.d("word", "data: "+json);
-                            MyResponse<List<WordLearningRecordWithUseridDTO>> myResponse = gson.fromJson(json, new TypeToken<MyResponse<List<WordLearningRecordWithUseridDTO>>>() {}.getType());
-                            if (myResponse.isSuccess()) {
-                                List<WordLearningRecordWithUseridDTO> wordLearningRecords = myResponse.getData();
-                                if (wordLearningRecords != null) {
-                                    try {
-                                        if (wordLearningRecordDao.loadLearningRecords(wordLearningRecords)) {
-                                            Toast.makeText(getContext(), "词汇背诵数据同步完成", Toast.LENGTH_SHORT).show();
-                                        }
-                                    } catch (Exception e) {
-                                        Toast.makeText(getContext(), "导入数据失败:"+e.getMessage(), Toast.LENGTH_SHORT).show();
-                                    }
-                                }else {
-                                    Toast.makeText(getContext(), "获取背诵记录为空", Toast.LENGTH_SHORT).show();
-                                }
-                            }else {
-                                Toast.makeText(getContext(), "同步词汇背诵数据失败: " + myResponse.getMessage(), Toast.LENGTH_SHORT).show();
+                        if (myResponse.isSuccess()) {
+                            wordLearningRecordDao.deleteAllLearningRecords();
+                            List<WordLearningRecordWithUseridDTO> wordLearningRecords = myResponse.getData();
+                            if (wordLearningRecords != null && !wordLearningRecords.isEmpty()) {
+                                boolean success = wordLearningRecordDao.loadLearningRecords(wordLearningRecords);
+                                final String message = success ? "词汇背诵数据同步完成" : "导入数据失败";
+                                requireActivity().runOnUiThread(() -> Toast.makeText(getContext(), message, Toast.LENGTH_SHORT).show());
+                            } else {
+                                requireActivity().runOnUiThread(() -> Toast.makeText(getContext(), "获取背诵记录为空", Toast.LENGTH_SHORT).show());
                             }
-                        }catch (Exception e){
-                            Toast.makeText(getContext(), "解析词汇背诵数据失败: " + e.getMessage(), Toast.LENGTH_SHORT).show();
-                            Log.d("wordjiexishibai", "reponse: "+json);
+                        } else {
+                            final String errorMessage = "获取词汇背诵数据失败: " + myResponse.getMessage();
+                            requireActivity().runOnUiThread(() -> Toast.makeText(getContext(), errorMessage, Toast.LENGTH_SHORT).show());
                         }
-                    } else {
-                        Toast.makeText(getContext(), "连接词汇背诵数据失败: " + response.message(), Toast.LENGTH_SHORT).show();
+                    } catch (Exception e) {
+                        Log.e("wordjiexishibai", "exception: ", e);
+                        requireActivity().runOnUiThread(() -> Toast.makeText(getContext(), "解析词汇背诵数据失败", Toast.LENGTH_SHORT).show());
                     }
-                });
+                } else {
+                    requireActivity().runOnUiThread(() -> Toast.makeText(getContext(), "连接词汇背诵数据失败: " + response.message(), Toast.LENGTH_SHORT).show());
+                }
             }
-
         });
         // 获取时间学习数据
         request = new Request.Builder()
@@ -323,45 +316,41 @@ public class DataSyncFragment extends Fragment {
 
             @Override
             public void onResponse(@NonNull Call call, @NonNull Response response) throws IOException {
-                requireActivity().runOnUiThread(()->{
-                    if (response.isSuccessful()) { //  请求成功
-                        String  json = null;
-                        try {
-                            json = response.body().string();
-                        } catch (IOException e) {
-                            throw new RuntimeException(e);
+                if (response.isSuccessful()) {
+                    try {
+                        final ResponseBody responseBody = response.body();
+                        if (responseBody == null) {
+                            requireActivity().runOnUiThread(() -> Toast.makeText(getContext(), "响应体为空", Toast.LENGTH_SHORT).show());
+                            return;
                         }
-                        try {
-                            if (response.body() == null){
-                                Toast.makeText(getContext(), "响应体为空 ", Toast.LENGTH_SHORT).show();
-                                return;
-                            }
 
-                            MyResponse<List<TimeLearnedWithUseridDTO>> myResponse = gson.fromJson(json, new TypeToken<MyResponse<List<TimeLearnedWithUseridDTO>>>(){}.getType());
-                            Log.d("time learn", "data: "+json);
-                            if (myResponse.isSuccess()) { // 获取数据包成功
-                                List<TimeLearnedWithUseridDTO> records = myResponse.getData();
-                                if (records!=null) { // 数据包非空
-                                    if (timeLearnedDao.loadTimeLearned(records)) { // 载入数据包成功
-                                        Toast.makeText(getContext(), "同步专注时长成功", Toast.LENGTH_SHORT).show();
-                                    } else {
-                                        Toast.makeText(getContext(), "同步专注时长失败", Toast.LENGTH_SHORT).show();
-                                    }
-                                }else {
-                                    Toast.makeText(getContext(), "获取专注时长记录为空: " + response.message(), Toast.LENGTH_SHORT).show();
-                                }
-                            }else {
-                                Toast.makeText(getContext(), "获取学习时间失败", Toast.LENGTH_SHORT).show();
+                        String json = responseBody.string(); // 后台线程读取
+                        MyResponse<List<TimeLearnedWithUseridDTO>> myResponse = gson.fromJson(json, new TypeToken<MyResponse<List<TimeLearnedWithUseridDTO>>>(){}.getType());
+                        Log.d("TimeGetId", userId.toString());
+                        Log.d("TimeResponse", json);
+
+                        if (myResponse.isSuccess()) {
+                            timeLearnedDao.deleteAllTimeLearned();
+                            List<TimeLearnedWithUseridDTO> records = myResponse.getData();
+                            if (records != null && !records.isEmpty()) {
+                                boolean success = timeLearnedDao.loadTimeLearned(records);
+                                final String message = success ? "同步专注时长成功" : "同步专注时长失败";
+                                requireActivity().runOnUiThread(() -> Toast.makeText(getContext(), message, Toast.LENGTH_SHORT).show());
+                            } else {
+                                requireActivity().runOnUiThread(() -> Toast.makeText(getContext(), "获取专注时长记录为空", Toast.LENGTH_SHORT).show());
                             }
-                        }catch (Exception e){
-                            Toast.makeText(getContext(), "解析专注时长数据失败: "+e.getMessage(), Toast.LENGTH_SHORT).show();
-                            Log.d("timeLearnjiexishibai", "response: " + json);
+                        } else {
+                            requireActivity().runOnUiThread(() -> Toast.makeText(getContext(), "获取学习时间失败"+myResponse.getMessage(), Toast.LENGTH_SHORT).show());
                         }
-                    } else {
-                        Toast.makeText(getContext(), "获取专注时长失败", Toast.LENGTH_SHORT).show();
+                    } catch (Exception e) {
+                        Log.e("timeLearnjiexishibai", "exception: ", e);
+                        requireActivity().runOnUiThread(() -> Toast.makeText(getContext(), "解析专注时长数据失败", Toast.LENGTH_SHORT).show());
                     }
-                });
+                } else {
+                    requireActivity().runOnUiThread(() -> Toast.makeText(getContext(), "获取专注时长失败", Toast.LENGTH_SHORT).show());
+                }
             }
+
 
             @Override
             public void onFailure(@NonNull Call call, @NonNull IOException e) {
@@ -371,7 +360,26 @@ public class DataSyncFragment extends Fragment {
             }
         });
         //  更新已背诵
-        wordDao.updateRememberedStatus(wordLearningRecordDao.getAllRememberedWordIds());
+        new Thread(() -> {
+            try {
+                List<Integer> rememberedWordIds = wordLearningRecordDao.getAllRememberedWordIds();
+                wordDao.updateRememberedStatus(rememberedWordIds);
+                    FocusModeFragment focusModeFragment = (FocusModeFragment) requireActivity().getSupportFragmentManager().findFragmentByTag("time");
+                    if (focusModeFragment != null) {
+                        Log.d("done", "syncDataFromServer:");
+                        focusModeFragment.updateTotalFocusTimeDisplay();
+                    }
+                    WordRecitationWelcomeFragment wordRecitationFragment = (WordRecitationWelcomeFragment) requireActivity().getSupportFragmentManager().findFragmentByTag("word");
+                    if (wordRecitationFragment != null) {
+                        Log.d("done", "syncDataFromServer:");
+                        wordRecitationFragment.updateTodayStats();
+                    }
+                Log.d("done", "同步完成");
+            } catch (Exception e) {
+                Log.e("DataSyncFragment", "数据库更新失败", e);
+            }
+        }).start();
+
     }
 
     private Integer loadUserId() {

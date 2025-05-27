@@ -58,7 +58,7 @@ public class MainActivity extends AppCompatActivity {
         if (wordFragment == null) {
             wordFragment = new WordRecitationWelcomeFragment();
             fm.beginTransaction()
-                    .add(R.id.container_word, wordFragment)
+                    .add(R.id.container_word, wordFragment, "word")
                     .hide(wordFragment)
                     .addToBackStack(null)
                     .commit();
@@ -69,7 +69,7 @@ public class MainActivity extends AppCompatActivity {
         if (focusFragment == null) {
             focusFragment = new FocusModeFragment();
             fm.beginTransaction()
-                    .add(R.id.container_focus, focusFragment)
+                    .add(R.id.container_focus, focusFragment,  "time")
                     .hide(focusFragment)
                     .addToBackStack(null)
                     .commit();
@@ -99,7 +99,6 @@ public class MainActivity extends AppCompatActivity {
                 Fragment fragment = isLoggedIn ? new DataSyncFragment() : new CommunityFragment();
                 showModule(containerCommunity, fragment);
             }
-
             return true;
         });
     }

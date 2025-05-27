@@ -9,10 +9,12 @@ import android.widget.CalendarView;
 import android.widget.TextView;
 import androidx.fragment.app.Fragment;
 import androidx.fragment.app.FragmentTransaction;
+import androidx.lifecycle.ViewModelProvider;
 
 import com.example.myapp.R;
 import com.example.myapp.dao.SqliteConnection;
 import com.example.myapp.dao.WordLearningRecordDao;
+import com.example.myapp.model.SharedViewModel;
 
 import java.util.Date;
 
@@ -89,7 +91,7 @@ public class WordRecitationWelcomeFragment extends Fragment {
         });
     }
     
-    private void updateTodayStats() {
+    public void updateTodayStats() {
         Date today = new Date();
         int todayCount = learningRecordDao.getLearningCountByDate(today);
         todayStats.setText(String.format("今日学习：%d个单词", todayCount));

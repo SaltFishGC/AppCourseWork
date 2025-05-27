@@ -61,7 +61,6 @@ public class WordLearningRecordDao {
         values.put("netem_learned_date", new Date().getTime()); // 存储当前时间戳
 
         long result = db.insert(TABLE_NAME, null, values);
-        db.close();
         return result != -1;
     }
 
@@ -91,7 +90,6 @@ public class WordLearningRecordDao {
                 records.add(record);
             }
         }
-        db.close();
         return records;
     }
 
@@ -116,7 +114,6 @@ public class WordLearningRecordDao {
                 return cursor.getInt(cursor.getColumnIndexOrThrow("count"));
             }
         }
-        db.close();
         return 0;
     }
 
@@ -133,7 +130,6 @@ public class WordLearningRecordDao {
                 return cursor.getInt(cursor.getColumnIndexOrThrow("count"));
             }
         }
-        db.close();
         return 0;
     }
 
@@ -154,7 +150,6 @@ public class WordLearningRecordDao {
                 records.add(record);
             }
         }
-        db.close();
         return records;
     }
 
@@ -164,7 +159,6 @@ public class WordLearningRecordDao {
     public void deleteAllLearningRecords() {
         SQLiteDatabase db = dbHelper.getWritableDatabase();
         db.delete(TABLE_NAME, null, null);
-        db.close();
     }
 
     /**
@@ -181,17 +175,14 @@ public class WordLearningRecordDao {
                 ContentValues values = new ContentValues();
                 values.put("netem_learned_id", record.getNetemLearnedId());
                 values.put("netem_learned_date", record.getNetemLearnedDate().getTime());
-                Log.d("DATEERROR", "loadLearningRecords: "+record.getNetemLearnedDate()+record.getNetemLearnedDate().getTime());
                 db.insert(TABLE_NAME, null, values);
             }
         }catch (Exception e){
             db.endTransaction();
-            db.close();
             return false;
         }
         db.setTransactionSuccessful();
         db.endTransaction();
-        db.close();
         return true;
     }
     /**
@@ -206,7 +197,6 @@ public class WordLearningRecordDao {
                 wordIds.add(cursor.getInt(cursor.getColumnIndexOrThrow("netem_learned_id")));
             }
         }
-        db.close();
         return wordIds;
     }
 

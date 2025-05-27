@@ -137,6 +137,8 @@ public class NetemLearnedDetailController {
         queryWrapper.eq("user_id", userId)
                    .orderByDesc("netem_learned_date");
         List<NetemLearnedDetail> list = netemLearnedDetailService.list(queryWrapper);
+        if (list.isEmpty())
+            return response.error("无该用户对应数据");
         return response.ok(list);
     }
 

@@ -125,7 +125,6 @@ public class TimeLearnedDao {
                 timeLearned.setTimeLearned(cursor.getDouble(cursor.getColumnIndexOrThrow(COLUMN_TIME)));
                 timeLearned.setTimeLearnedDate(new Date(cursor.getLong(cursor.getColumnIndexOrThrow(COLUMN_DATE))));
                 timeLearnedList.add(timeLearned);
-                db.close();
             }
         }
         return timeLearnedList;
@@ -136,7 +135,6 @@ public class TimeLearnedDao {
     public void deleteAllTimeLearned() {
         SQLiteDatabase db = dbHelper.getWritableDatabase();
         db.delete(TABLE_NAME, null, null);
-        db.close();
     }
     /**
      * 载入专注记录
@@ -155,12 +153,10 @@ public class TimeLearnedDao {
             }
         }catch (Exception e){
             db.endTransaction();
-            db.close();
             return false;
         }
         db.setTransactionSuccessful();
         db.endTransaction();
-        db.close();
         return true;
     }
 } 

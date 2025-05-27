@@ -11,7 +11,7 @@
         android:layout_height="wrap_content"
         android:text="数据上传"
         android:layout_marginBottom="16dp"
-        android:layout_marginTop="200dp"/>
+        android:layout_marginTop="50dp"/>
 
     <Button
         android:id="@+id/btn_sync"

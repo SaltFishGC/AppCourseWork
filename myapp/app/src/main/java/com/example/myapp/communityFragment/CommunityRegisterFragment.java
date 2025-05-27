@@ -39,6 +39,7 @@ public class CommunityRegisterFragment extends Fragment {
     private TextInputEditText passwordText;
     private TextInputEditText passwordAgainText;
     private MaterialButton registerButton;
+    private MaterialButton quitButton;
     private String serverIp;
     private String serverPort;
     @Override
@@ -50,8 +51,8 @@ public class CommunityRegisterFragment extends Fragment {
         serverPort=ConnectSet.getServerPort(getContext());
         // 初始化控件
         initViews(view);
-        // 设置注册按钮的点击事件
-        setUpRegisterButton();
+        // 设置按钮的点击事件
+        setupButtons();
 
         return view;
     }
@@ -61,6 +62,11 @@ public class CommunityRegisterFragment extends Fragment {
         passwordText = view.findViewById(R.id.password_register_input);
         passwordAgainText = view.findViewById(R.id.password_register_again_input);
         registerButton  = view.findViewById(R.id.btn_register_now);
+        quitButton = view.findViewById(R.id.btn_register_quit);
+    }
+    private void setupButtons() {
+        setUpRegisterButton();
+        setUpQuitButton();
     }
 
     public void setUpRegisterButton(){
@@ -83,6 +89,17 @@ public class CommunityRegisterFragment extends Fragment {
                 } catch (JSONException e) {
                     throw new RuntimeException(e);
                 }
+            }
+        });
+    }
+    private void setUpQuitButton() {
+        quitButton.setOnClickListener(new View.OnClickListener() {
+            @Override
+            public void onClick(View view) {
+                FragmentTransaction transaction = requireActivity().getSupportFragmentManager().beginTransaction();
+                transaction.replace(R.id.container_community, new CommunityFragment());
+                transaction.addToBackStack(null);
+                transaction.commit();
             }
         });
     }
@@ -118,7 +135,7 @@ public class CommunityRegisterFragment extends Fragment {
                                 saveUserId(registerResponse.getData());
                                 Toast.makeText(getContext(), "注册成功", Toast.LENGTH_SHORT).show();
                                 FragmentTransaction transaction = requireActivity().getSupportFragmentManager().beginTransaction();
-                                transaction.replace(R.id.fragment_container, new DataSyncFragment());
+                                transaction.replace(R.id.container_community, new DataSyncFragment());
                                 transaction.addToBackStack(null);
                                 transaction.commit();
                             }else {

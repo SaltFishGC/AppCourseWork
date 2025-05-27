@@ -4,19 +4,43 @@
     android:layout_width="match_parent"
     android:layout_height="match_parent">
 
+    <!-- 使用FrameLayout作为容器承载多个FragmentContainerView -->
     <FrameLayout
         android:id="@+id/fragment_container"
         android:layout_width="match_parent"
         android:layout_height="0dp"
         app:layout_constraintBottom_toTopOf="@+id/bottom_navigation"
-        app:layout_constraintTop_toTopOf="parent" />
+        app:layout_constraintTop_toTopOf="parent">
+
+        <!-- 每个模块独立的Fragment容器 -->
+        <androidx.fragment.app.FragmentContainerView
+            android:id="@+id/container_word"
+            android:name="com.example.myapp.wordFragment.WordRecitationWelcomeFragment"
+            android:layout_width="match_parent"
+            android:layout_height="match_parent"
+            android:visibility= "gone"/>
+
+        <androidx.fragment.app.FragmentContainerView
+            android:id="@+id/container_focus"
+            android:name="com.example.myapp.focusFragment.FocusModeFragment"
+            android:layout_width="match_parent"
+            android:layout_height="match_parent"
+            android:visibility="gone" />
+
+        <androidx.fragment.app.FragmentContainerView
+            android:id="@+id/container_community"
+            android:name="com.example.myapp.communityFragment.CommunityFragment"
+            android:layout_width="match_parent"
+            android:layout_height="match_parent"
+            android:visibility="gone" />
+    </FrameLayout>
 
     <com.google.android.material.bottomnavigation.BottomNavigationView
         android:id="@+id/bottom_navigation"
-                android:layout_width="match_parent"
-                android:layout_height="wrap_content"
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
         android:layout_gravity="bottom"
         app:layout_constraintBottom_toBottomOf="parent"
         app:menu="@menu/bottom_navigation_menu" />
 
-        </androidx.constraintlayout.widget.ConstraintLayout>
+</androidx.constraintlayout.widget.ConstraintLayout>

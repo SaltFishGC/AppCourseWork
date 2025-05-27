@@ -1,8 +1,16 @@
 <?xml version="1.0" encoding="utf-8"?>
 <network-security-config>
-    <domain-config cleartextTrafficPermitted="true">
-        <domain includeSubdomains="true">10.0.182.89</domain>
-        <domain includeSubdomains="true">10.0.156.9</domain>
-        <domain includeSubdomains="true">10.0.120.184</domain>
-    </domain-config>
+    <base-config cleartextTrafficPermitted="true">
+        <trust-anchors>
+            <certificates src="system" />
+        </trust-anchors>
+    </base-config>
 </network-security-config>
+    <!--<?xml version="1.0" encoding="utf-8"?>-->
+    <!--<network-security-config>-->
+    <!--    <domain-config cleartextTrafficPermitted="true">-->
+    <!--        <domain includeSubdomains="true">10.0.182.89</domain>-->
+    <!--        <domain includeSubdomains="true">10.0.156.9</domain>-->
+    <!--        <domain includeSubdomains="true">10.0.120.184</domain>-->
+    <!--    </domain-config>-->
+    <!--</network-security-config>-->

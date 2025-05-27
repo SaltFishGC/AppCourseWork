@@ -1,0 +1,4 @@
+<selector xmlns:android="http://schemas.android.com/apk/res/android">
+<item android:state_checked="true" android:color="#1976D2" /> <!-- 浅蓝 -->
+<item android:color="#E0E0E0" /> <!-- 灰色 -->
+</selector>

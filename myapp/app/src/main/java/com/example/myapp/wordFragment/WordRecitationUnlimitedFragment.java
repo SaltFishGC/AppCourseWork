@@ -201,7 +201,7 @@ public class WordRecitationUnlimitedFragment extends Fragment {
         }, 4000);
         // 返回欢迎页面
         requireActivity().getSupportFragmentManager().beginTransaction()
-                .replace(R.id.fragment_container, new WordRecitationWelcomeFragment())
+                .replace(R.id.container_word, new WordRecitationWelcomeFragment())
                 .commit();
     }
 } 

@@ -1,6 +1,7 @@
 package com.example.myapp.focusFragment;
 
 import android.app.Dialog;
+import android.app.NotificationManager;
 import android.content.ComponentName;
 import android.content.Context;
 import android.content.Intent;
@@ -15,10 +16,13 @@ import android.os.IBinder;
 import android.os.Looper;
 import android.os.Vibrator;
 import android.os.VibrationEffect;
+import android.provider.Settings;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
 import android.widget.TextView;
+import android.widget.Toast;
+
 import androidx.appcompat.app.AlertDialog;
 import androidx.fragment.app.Fragment;
 
@@ -38,6 +42,8 @@ import com.example.myapp.entity.TimeLearned;
 import java.util.Date;
 
 public class FocusModeFragment extends Fragment {
+    private static final int REQUEST_CODE_NOTIFICATION_POLICY = 1234;
+
     private TextView timerText;
     private MaterialButton startButton;
     private MaterialButton stopButton;
@@ -56,6 +62,7 @@ public class FocusModeFragment extends Fragment {
     private int totalFocusSeconds = 0; // 记录总专注时长
     private int initialDuration = 0; // 记录开始时的倒计时时长
     private TimeLearnedDao timeLearnedDao;
+    private Runnable pendingRingerModeChange;
 
     private ServiceConnection connection = new ServiceConnection() {
         @Override
@@ -148,12 +155,14 @@ public class FocusModeFragment extends Fragment {
         
         // 设置静音模式
         if (silentSwitch.isChecked()) {
-            AudioManager audioManager = (AudioManager) requireContext().getSystemService(Context.AUDIO_SERVICE);
-            if (audioManager != null) {
-                audioManager.setRingerMode(AudioManager.RINGER_MODE_SILENT);
-            }
+            checkAndRequestNotificationPolicyPermission(() -> {
+                AudioManager audioManager = (AudioManager) requireContext().getSystemService(Context.AUDIO_SERVICE);
+                if (audioManager != null) {
+                    audioManager.setRingerMode(AudioManager.RINGER_MODE_SILENT);
+                }
+            });
         }
-        
+
         // 更新UI
         startButton.setVisibility(View.GONE);
         stopButton.setVisibility(View.VISIBLE);
@@ -166,32 +175,43 @@ public class FocusModeFragment extends Fragment {
     }
 
     private void stopFocusMode() {
-        // 停止服务
+        // 检查 Context 是否有效
+        if (getActivity() == null) return;
+
+        // 恢复声音
+        checkAndRequestNotificationPolicyPermission(() -> {
+            AudioManager audioManager = (AudioManager) getActivity().getSystemService(Context.AUDIO_SERVICE);
+            if (audioManager != null) {
+                audioManager.setRingerMode(AudioManager.RINGER_MODE_NORMAL);
+            }
+        });
+
+        // 解绑服务前检查是否已绑定
         if (isBound) {
-            getActivity().unbindService(connection);
+            try {
+                getActivity().unbindService(connection);
+            } catch (Exception e) {
+                e.printStackTrace();
+            }
             isBound = false;
         }
+
+        // 停止服务
         getActivity().stopService(new Intent(getActivity(), FocusModeService.class));
-        
-        // 恢复声音
-        AudioManager audioManager = (AudioManager) requireContext().getSystemService(Context.AUDIO_SERVICE);
-        if (audioManager != null) {
-            audioManager.setRingerMode(AudioManager.RINGER_MODE_NORMAL);
-        }
-        
+
         // 更新UI
         startButton.setVisibility(View.VISIBLE);
         stopButton.setVisibility(View.GONE);
         modeSwitchButton.setVisibility(View.VISIBLE);
         durationSlider.setEnabled(true);
         isRunning = false;
-        
+
         // 停止计时
         handler.removeCallbacksAndMessages(null);
-        
+
         // 显示专注时长统计
         showFocusStats();
-        
+
         // 重置计时器显示
         if (isCountdownMode) {
             updateTimerDisplay((int) durationSlider.getValue() * 60);
@@ -199,6 +219,7 @@ public class FocusModeFragment extends Fragment {
             updateTimerDisplay(0);
         }
     }
+
 
     private void switchMode() {
         isCountdownMode = !isCountdownMode;
@@ -316,18 +337,71 @@ public class FocusModeFragment extends Fragment {
         }, 4000);
     }
 
+    /**
+     * 检查并请求修改铃声模式的权限（Do Not Disturb）
+     * 如果已有权限，执行 onGranted 回调
+     */
+    private void checkAndRequestNotificationPolicyPermission(Runnable onGranted) {
+        if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.M) {
+            NotificationManager notificationManager =
+                (NotificationManager) requireContext().getSystemService(Context.NOTIFICATION_SERVICE);
+
+            if (!notificationManager.isNotificationPolicyAccessGranted()) {
+                pendingRingerModeChange = onGranted;
+                Intent intent = new Intent(Settings.ACTION_NOTIFICATION_POLICY_ACCESS_SETTINGS);
+                startActivityForResult(intent, REQUEST_CODE_NOTIFICATION_POLICY);
+            } else {
+                if (onGranted != null) {
+                    onGranted.run();
+                }
+            }
+        } else {
+            if (onGranted != null) {
+                onGranted.run();
+            }
+        }
+    }
+
+    @Override
+    public void onActivityResult(int requestCode, int resultCode, Intent data) {
+        super.onActivityResult(requestCode, resultCode, data);
+
+        if (requestCode == REQUEST_CODE_NOTIFICATION_POLICY) {
+            if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.M) {
+                NotificationManager notificationManager =
+                    (NotificationManager) requireContext().getSystemService(Context.NOTIFICATION_SERVICE);
+
+                if (notificationManager.isNotificationPolicyAccessGranted()) {
+                    // 用户已授权，继续执行上次未完成的操作（如设置铃声模式）
+                    if (pendingRingerModeChange != null) {
+                        pendingRingerModeChange.run();
+                        pendingRingerModeChange = null;
+                    }
+                } else {
+                    // 用户拒绝授权，提示信息
+                    Toast.makeText(requireContext(), "需要授权才能调整铃声模式", Toast.LENGTH_SHORT).show();
+                }
+            }
+        }
+    }
+
     @Override
     public void onDestroy() {
         super.onDestroy();
-        if (isBound) {
-            getActivity().unbindService(connection);
-            isBound = false;
-        }
         handler.removeCallbacksAndMessages(null);
         
         // 关闭数据库连接
         if (timeLearnedDao != null) {
             timeLearnedDao.close();
+        }
+        // 防止重复解绑
+        if (isBound) {
+            try {
+                getActivity().unbindService(connection);
+            } catch (Exception e) {
+                e.printStackTrace();
+            }
+            isBound = false;
         }
     }
 } 

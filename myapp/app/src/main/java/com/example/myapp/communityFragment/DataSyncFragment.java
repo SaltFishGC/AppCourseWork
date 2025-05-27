@@ -84,7 +84,7 @@ public class DataSyncFragment extends Fragment {
                     .apply();
 
             requireActivity().getSupportFragmentManager().beginTransaction()
-                    .replace(R.id.fragment_container, new CommunityFragment())
+                    .replace(R.id.container_community, new CommunityFragment())
                     .commit();
         });
     }

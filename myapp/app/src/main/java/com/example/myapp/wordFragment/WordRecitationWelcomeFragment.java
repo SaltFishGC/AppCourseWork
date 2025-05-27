@@ -64,7 +64,7 @@ public class WordRecitationWelcomeFragment extends Fragment {
         startButton.setOnClickListener(v -> {
             // 跳转到背诵页面
             FragmentTransaction transaction = requireActivity().getSupportFragmentManager().beginTransaction();
-            transaction.replace(R.id.fragment_container, new WordRecitationFragment());
+            transaction.replace(R.id.container_word, new WordRecitationFragment());
             transaction.addToBackStack(null);
             transaction.commit();
         });
@@ -73,7 +73,7 @@ public class WordRecitationWelcomeFragment extends Fragment {
         unlimitedModeButton.setOnClickListener(v -> {
             // 跳转到无限背诵页面
             FragmentTransaction transaction = requireActivity().getSupportFragmentManager().beginTransaction();
-            transaction.replace(R.id.fragment_container, new WordRecitationUnlimitedFragment());
+            transaction.replace(R.id.container_word, new WordRecitationUnlimitedFragment());
             transaction.addToBackStack(null);
             transaction.commit();
         });

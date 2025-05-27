@@ -136,10 +136,11 @@ public class WordRecitationFragment extends Fragment {
 
     // 处理单词响应
     private void handleWordResponse(int response) {
-        if (currentIndex >= wordList.size()) {
+        if (currentIndex >= totalWords) {
             if (reviewList.isEmpty()) {
                 // 所有单词都已记住，返回欢迎页面
                 returnToWelcomeFragment();
+                return;
             } else {
                 // 还有需要复习的单词
                 wordList = new ArrayList<>(reviewList);
@@ -164,10 +165,11 @@ public class WordRecitationFragment extends Fragment {
 
         currentIndex++;
         
-        if (currentIndex >= wordList.size()) {
+        if (currentIndex >= totalWords) {
             if (reviewList.isEmpty()) {
                 // 所有单词都已记住，返回欢迎页面
                 returnToWelcomeFragment();
+                return;
             } else {
                 // 还有需要复习的单词
                 wordList = new ArrayList<>(reviewList);
@@ -181,7 +183,8 @@ public class WordRecitationFragment extends Fragment {
 
     // 更新单词显示
     private void updateWordDisplay() {
-        if (currentIndex < wordList.size()) {
+
+        if (currentIndex < totalWords) {
             Word currentWord = wordList.get(currentIndex);
             wordText.setText(currentWord.getWord());
             definitionText.setText(currentWord.getDefinition());
@@ -196,6 +199,10 @@ public class WordRecitationFragment extends Fragment {
 
     // 返回欢迎页面
     private void returnToWelcomeFragment() {
+        btnNeverSeen.setEnabled(false);
+        btnForgot.setEnabled(false);
+        btnRemembered.setEnabled(false);
+
         // 创建自定义对话框布局
         View dialogView = LayoutInflater.from(requireContext()).inflate(R.layout.dialog_well_done, null);
         TextView titleView = dialogView.findViewById(R.id.dialog_title);
@@ -217,7 +224,7 @@ public class WordRecitationFragment extends Fragment {
         dialog.setOnDismissListener(dialogInterface -> {
             // 对话框关闭时返回欢迎页面
             requireActivity().getSupportFragmentManager().beginTransaction()
-                    .replace(R.id.fragment_container, new WordRecitationWelcomeFragment())
+                    .replace(R.id.container_word, new WordRecitationWelcomeFragment())
                     .commit();
         });
 

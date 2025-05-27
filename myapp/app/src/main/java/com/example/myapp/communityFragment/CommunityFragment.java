@@ -40,7 +40,8 @@ public class CommunityFragment extends Fragment {
     @Override
     public View onCreateView(LayoutInflater inflater, ViewGroup container, Bundle savedInstanceState) {
         View view = inflater.inflate(R.layout.fragment_community, container, false);
-
+        // 检查登录状态
+        checkLoginStatus();
         // 初始化控件
         initViews(view);
 
@@ -53,7 +54,15 @@ public class CommunityFragment extends Fragment {
 
         return view;
     }
-
+    private void checkLoginStatus() {
+        if (loadUserId() != -1) {
+            // 已登录，跳转到操作界面
+            FragmentTransaction transaction = requireActivity().getSupportFragmentManager().beginTransaction();
+            transaction.replace(R.id.container_community, new DataSyncFragment());
+            transaction.addToBackStack(null);
+            transaction.commit();
+        }
+    }
     private void initViews(View view) {
         usernameText= view.findViewById(R.id.username_input);
         passwordText= view.findViewById(R.id.password_input);
@@ -129,7 +138,7 @@ public class CommunityFragment extends Fragment {
         registerButton.setOnClickListener(v -> {
             // 注册按钮逻辑
             FragmentTransaction transaction = requireActivity().getSupportFragmentManager().beginTransaction();
-            transaction.replace(R.id.fragment_container, new CommunityRegisterFragment());
+            transaction.replace(R.id.container_community, new CommunityRegisterFragment());
             transaction.addToBackStack(null);
             transaction.commit();
         });
@@ -173,7 +182,7 @@ public class CommunityFragment extends Fragment {
                                 saveUserId(userId);
                                 Toast.makeText(getContext(), "登录成功", Toast.LENGTH_SHORT).show();
                                 FragmentTransaction transaction = requireActivity().getSupportFragmentManager().beginTransaction();
-                                transaction.replace(R.id.fragment_container, new DataSyncFragment());
+                                transaction.replace(R.id.container_community, new DataSyncFragment());
                                 transaction.addToBackStack(null);
                                 transaction.commit();
                             } else {

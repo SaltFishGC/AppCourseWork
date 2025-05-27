@@ -123,6 +123,8 @@
                 android:layout_width="match_parent"
                 android:layout_height="wrap_content"
                 android:text="静音模式"
+                app:thumbTint="@color/switch_thumb_tint"
+                app:trackTint="@color/switch_track_tint"
                 android:layout_marginTop="16dp"/>
 
         </LinearLayout>

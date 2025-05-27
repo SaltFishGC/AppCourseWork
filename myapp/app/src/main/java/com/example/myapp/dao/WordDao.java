@@ -111,4 +111,27 @@ public class WordDao {
         }
         db.close();
     }
+    /**
+     * 根据id获取单词
+     * @param wordId 单词ID
+     * @return 单词对象
+     */
+    public Word getWordById(int wordId) {
+        SQLiteDatabase  db = dbHelper.getReadableDatabase();
+        String query = "SELECT * FROM " + TABLE_NAME + " WHERE id = ?";
+        try (Cursor cursor = db.rawQuery(query, new String[]{String.valueOf(wordId)})) {
+            if (cursor.moveToFirst()) {
+                Word word = new Word();
+                word.setId(cursor.getInt(cursor.getColumnIndexOrThrow("id")));
+                word.setFrequency(cursor.getInt(cursor.getColumnIndexOrThrow("frequency")));
+                word.setWord(cursor.getString(cursor.getColumnIndexOrThrow("word")));
+                word.setDefinition(cursor.getString(cursor.getColumnIndexOrThrow("definition")));
+                word.setVariant(cursor.getString(cursor.getColumnIndexOrThrow("variant")));
+                word.setTopic(cursor.getString(cursor.getColumnIndexOrThrow("topic")));
+                word.setRemembered(cursor.getInt(cursor.getColumnIndexOrThrow("remembered")));
+                return word;
+            }
+        }
+        return null;
+    }
 }

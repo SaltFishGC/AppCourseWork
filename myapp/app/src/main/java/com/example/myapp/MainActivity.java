@@ -2,7 +2,13 @@ package com.example.myapp;
 
 import android.content.Context;
 import android.os.Bundle;
+import android.util.Log;
+import android.view.View;
+
 import androidx.appcompat.app.AppCompatActivity;
+import androidx.fragment.app.FragmentContainerView;
+import androidx.fragment.app.FragmentManager;
+import androidx.fragment.app.FragmentTransaction;
 
 import com.example.myapp.communityFragment.CommunityFragment;
 import com.example.myapp.communityFragment.DataSyncFragment;
@@ -15,60 +21,111 @@ import androidx.fragment.app.Fragment;
 public class MainActivity extends AppCompatActivity {
     private BottomNavigationView bottomNavigationView;
     private FocusModeService focusModeService;
-    private boolean isBound = false;
+
+    // 新增：引用三个Fragment容器
+    private FragmentContainerView containerWord, containerFocus, containerCommunity;
+
+    // 新增：保存每个容器对应的Fragment
+    private Fragment wordFragment, focusFragment, communityFragment;
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_main);
 
+        initViews();
+
+        initFragments();
+
+        setupBottomNavigation();
+
+        showModule(containerWord, wordFragment);
+
+    }
+    private void initViews() {
+        // 获取底部导航栏
         bottomNavigationView = findViewById(R.id.bottom_navigation);
-        bottomNavigationView.setOnItemSelectedListener(item -> {
-            // 如果专注模式正在运行，不允许切换Fragment
-            if (focusModeService != null && focusModeService.isRunning()) {
-                return false;
-            }
+        // 初始化三个Fragment容器
+        containerWord = findViewById(R.id.container_word);
+        containerFocus = findViewById(R.id.container_focus);
+        containerCommunity = findViewById(R.id.container_community);
+    }
 
-            Fragment selectedFragment = null;
-            int itemId = item.getItemId();
-
-            if (itemId == R.id.nav_word_recitation) {
-                selectedFragment = new WordRecitationWelcomeFragment();
-            } else if (itemId == R.id.nav_focus_mode) {
-                selectedFragment = new FocusModeFragment();
-            } else if (itemId == R.id.nav_community) {
-                // 检查是否已登录（即 user_id 是否存在）
-                if (savedInstanceState == null) {
-                    boolean isLoggedIn = checkUserLoginStatus();
-                    if (isLoggedIn) {
-                        selectedFragment  = new DataSyncFragment();
-                    } else {
-                        // 否则进入默认登录页面
-                        selectedFragment = new CommunityFragment();
-                    }
-                }
-
-            }
-
-            if (selectedFragment != null) {
-                getSupportFragmentManager().beginTransaction()
-                    .replace(R.id.fragment_container, selectedFragment)
+    private void initFragments() {
+        // 预加载三个模块的Fragment
+        FragmentManager fm = getSupportFragmentManager();
+        wordFragment = fm.findFragmentById(R.id.container_word);
+        if (wordFragment == null) {
+            wordFragment = new WordRecitationWelcomeFragment();
+            fm.beginTransaction()
+                    .add(R.id.container_word, wordFragment)
+                    .hide(wordFragment)
+                    .addToBackStack(null)
                     .commit();
-                return true;
-            }
-            return false;
-        });
+        }
+        Log.d("FragmentInit", "initFragments: wordFragment");
 
-        // 设置默认选中的Fragment
-        if (savedInstanceState == null) {
-            bottomNavigationView.setSelectedItemId(R.id.nav_word_recitation);
+        focusFragment = fm.findFragmentById(R.id.container_focus);
+        if (focusFragment == null) {
+            focusFragment = new FocusModeFragment();
+            fm.beginTransaction()
+                    .add(R.id.container_focus, focusFragment)
+                    .hide(focusFragment)
+                    .addToBackStack(null)
+                    .commit();
+        }
+        Log.d("FragmentInit", "initFragments: focusFragment");
+
+        communityFragment = fm.findFragmentById(R.id.container_community);
+        if (communityFragment == null) {
+            communityFragment = new CommunityFragment();
+            fm.beginTransaction()
+                    .add(R.id.container_community, communityFragment)
+                    .hide(communityFragment)
+                    .addToBackStack(null)
+                    .commit();
+        }
+        Log.d("FragmentInit", "initFragments: communityFragment");
+    }
+
+    private void setupBottomNavigation() {
+        bottomNavigationView.setOnItemSelectedListener(item -> {
+            if (item.getItemId() == R.id.nav_word_recitation) {
+                showModule(containerWord, new WordRecitationWelcomeFragment());
+            } else if (item.getItemId() == R.id.nav_focus_mode) {
+                showModule(containerFocus, new FocusModeFragment());
+            } else if (item.getItemId() == R.id.nav_community) {
+                boolean isLoggedIn = checkUserLoginStatus();
+                Fragment fragment = isLoggedIn ? new DataSyncFragment() : new CommunityFragment();
+                showModule(containerCommunity, fragment);
+            }
+
+            return true;
+        });
+    }
+
+    // 核心方法：显示指定模块并维护其栈
+    private void showModule(FragmentContainerView container, Fragment fragment) {
+        FragmentManager fm = getSupportFragmentManager();
+
+        // 隐藏所有容器
+        for (int id : new int[]{R.id.container_word, R.id.container_focus, R.id.container_community}) {
+            Fragment frag = fm.findFragmentById(id);
+            View containerView = findViewById(id);
+            if (containerView != null) {
+                containerView.setVisibility(View.GONE);
+            }
+        }
+
+        // 显示当前容器
+        if (container != null) {
+            container.setVisibility(View.VISIBLE);
         }
     }
 
     @Override
     protected void onResume() {
         super.onResume();
-        // 检查专注模式状态并更新导航栏状态
         updateNavigationBarState();
     }
 
@@ -92,4 +149,21 @@ public class MainActivity extends AppCompatActivity {
         return userId != -1; // 如果 user_id 存在且不为 -1，说明已登录
     }
 
+    @Override
+    public void onBackPressed() {
+        FragmentManager fm = getSupportFragmentManager();
+
+        // 检查当前可见的容器
+        for (int id : new int[]{R.id.container_word, R.id.container_focus, R.id.container_community}) {
+            Fragment fragment = fm.findFragmentById(id);
+            if (fragment != null && fragment.isVisible()) {
+                if (fm.getBackStackEntryCount() > 0) {
+                    fm.popBackStack();
+                    return;
+                }
+            }
+        }
+
+        super.onBackPressed(); // 所有栈都空了才退出应用
+    }
 }

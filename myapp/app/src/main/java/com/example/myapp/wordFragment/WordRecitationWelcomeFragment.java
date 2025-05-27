@@ -22,6 +22,7 @@ public class WordRecitationWelcomeFragment extends Fragment {
     private TextView totalStats;
     private Button startButton;
     private Button unlimitedModeButton;
+    private Button sequentialModeButton; // 新增变量
     private SqliteConnection dbHelper;
     private WordLearningRecordDao learningRecordDao;
     //TODO 利用MaterialCalendarView实现日历显示背诵了几个词
@@ -52,6 +53,7 @@ public class WordRecitationWelcomeFragment extends Fragment {
         totalStats = view.findViewById(R.id.total_stats);
         startButton = view.findViewById(R.id.start_button);
         unlimitedModeButton = view.findViewById(R.id.unlimited_mode_button);
+        sequentialModeButton = view.findViewById(R.id.sequential_mode_button);
     }
 
     private void setupClickListeners() {
@@ -74,6 +76,14 @@ public class WordRecitationWelcomeFragment extends Fragment {
             // 跳转到无限背诵页面
             FragmentTransaction transaction = requireActivity().getSupportFragmentManager().beginTransaction();
             transaction.replace(R.id.container_word, new WordRecitationUnlimitedFragment());
+            transaction.addToBackStack(null);
+            transaction.commit();
+        });
+
+        // 设置顺序背诵按钮点击事件
+        sequentialModeButton.setOnClickListener(v -> {
+            FragmentTransaction transaction = requireActivity().getSupportFragmentManager().beginTransaction();
+            transaction.replace(R.id.container_word, new WordRecitationSequentialFragment());
             transaction.addToBackStack(null);
             transaction.commit();
         });

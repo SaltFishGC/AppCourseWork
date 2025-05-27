@@ -270,13 +270,23 @@ public class DataSyncFragment extends Fragment {
             public void onResponse(Call call, Response response) throws IOException {
                 requireActivity().runOnUiThread(() -> {
                     if (response.isSuccessful()) {
+                        String json = null;
                         try {
-                            String json = response.body().string();
-                            Log.d("Json", "onResponse: "+json);
+                            json = response.body().string();
+                        } catch (IOException e) {
+                            throw new RuntimeException(e);
+                        }
+
+                        try {
+                            if (response.body() == null){
+                                Toast.makeText(getContext(), "响应体为空 ", Toast.LENGTH_SHORT).show();
+                                return;
+                            }
+
+                            Log.d("word", "data: "+json);
                             MyResponse<List<WordLearningRecordWithUseridDTO>> myResponse = gson.fromJson(json, new TypeToken<MyResponse<List<WordLearningRecordWithUseridDTO>>>() {}.getType());
                             if (myResponse.isSuccess()) {
                                 List<WordLearningRecordWithUseridDTO> wordLearningRecords = myResponse.getData();
-                                Toast.makeText(getContext(), "获取词汇背诵数据成功", Toast.LENGTH_SHORT).show();
                                 if (wordLearningRecords != null) {
                                     try {
                                         if (wordLearningRecordDao.loadLearningRecords(wordLearningRecords)) {
@@ -293,7 +303,7 @@ public class DataSyncFragment extends Fragment {
                             }
                         }catch (Exception e){
                             Toast.makeText(getContext(), "解析词汇背诵数据失败: " + e.getMessage(), Toast.LENGTH_SHORT).show();
-                            Log.d("jiexishibai", "onResponse: "+e.getMessage());
+                            Log.d("wordjiexishibai", "reponse: "+json);
                         }
                     } else {
                         Toast.makeText(getContext(), "连接词汇背诵数据失败: " + response.message(), Toast.LENGTH_SHORT).show();
@@ -315,10 +325,20 @@ public class DataSyncFragment extends Fragment {
             public void onResponse(@NonNull Call call, @NonNull Response response) throws IOException {
                 requireActivity().runOnUiThread(()->{
                     if (response.isSuccessful()) { //  请求成功
+                        String  json = null;
                         try {
-                            String  json = response.body().string();
+                            json = response.body().string();
+                        } catch (IOException e) {
+                            throw new RuntimeException(e);
+                        }
+                        try {
+                            if (response.body() == null){
+                                Toast.makeText(getContext(), "响应体为空 ", Toast.LENGTH_SHORT).show();
+                                return;
+                            }
+
                             MyResponse<List<TimeLearnedWithUseridDTO>> myResponse = gson.fromJson(json, new TypeToken<MyResponse<List<TimeLearnedWithUseridDTO>>>(){}.getType());
-                            Log.d("time learn", "onResponse: "+json);
+                            Log.d("time learn", "data: "+json);
                             if (myResponse.isSuccess()) { // 获取数据包成功
                                 List<TimeLearnedWithUseridDTO> records = myResponse.getData();
                                 if (records!=null) { // 数据包非空
@@ -334,7 +354,8 @@ public class DataSyncFragment extends Fragment {
                                 Toast.makeText(getContext(), "获取学习时间失败", Toast.LENGTH_SHORT).show();
                             }
                         }catch (Exception e){
-                            Toast.makeText(getContext(), "解析专注时长失败"+e.getMessage(), Toast.LENGTH_SHORT).show();
+                            Toast.makeText(getContext(), "解析专注时长数据失败: "+e.getMessage(), Toast.LENGTH_SHORT).show();
+                            Log.d("timeLearnjiexishibai", "response: " + json);
                         }
                     } else {
                         Toast.makeText(getContext(), "获取专注时长失败", Toast.LENGTH_SHORT).show();

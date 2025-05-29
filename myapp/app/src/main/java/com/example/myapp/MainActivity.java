@@ -27,6 +27,7 @@ public class MainActivity extends AppCompatActivity {
 
     // 新增：保存每个容器对应的Fragment
     private Fragment wordFragment, focusFragment, communityFragment;
+    private FragmentManager fm;
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -39,7 +40,7 @@ public class MainActivity extends AppCompatActivity {
 
         setupBottomNavigation();
 
-        showModule(containerWord, wordFragment);
+        showModule(containerWord);
 
     }
     private void initViews() {
@@ -53,15 +54,15 @@ public class MainActivity extends AppCompatActivity {
 
     private void initFragments() {
         // 预加载三个模块的Fragment
-        FragmentManager fm = getSupportFragmentManager();
+        fm = getSupportFragmentManager();
         wordFragment = fm.findFragmentById(R.id.container_word);
         if (wordFragment == null) {
             wordFragment = new WordRecitationWelcomeFragment();
             fm.beginTransaction()
-                    .add(R.id.container_word, wordFragment, "word")
+                    .add(R.id.container_word, wordFragment)
                     .hide(wordFragment)
                     .addToBackStack(null)
-                    .commit();
+                    .commitNow();
         }
         Log.d("FragmentInit", "initFragments: wordFragment");
 
@@ -69,10 +70,10 @@ public class MainActivity extends AppCompatActivity {
         if (focusFragment == null) {
             focusFragment = new FocusModeFragment();
             fm.beginTransaction()
-                    .add(R.id.container_focus, focusFragment,  "time")
+                    .add(R.id.container_focus, focusFragment)
                     .hide(focusFragment)
                     .addToBackStack(null)
-                    .commit();
+                    .commitNow();
         }
         Log.d("FragmentInit", "initFragments: focusFragment");
 
@@ -83,7 +84,7 @@ public class MainActivity extends AppCompatActivity {
                     .add(R.id.container_community, communityFragment)
                     .hide(communityFragment)
                     .addToBackStack(null)
-                    .commit();
+                    .commitNow();
         }
         Log.d("FragmentInit", "initFragments: communityFragment");
     }
@@ -91,22 +92,38 @@ public class MainActivity extends AppCompatActivity {
     private void setupBottomNavigation() {
         bottomNavigationView.setOnItemSelectedListener(item -> {
             if (item.getItemId() == R.id.nav_word_recitation) {
-                showModule(containerWord, new WordRecitationWelcomeFragment());
+                showModule(containerWord);
+                // 检测当前容器中的fragment是否为welcome fragment页面，是则刷新数据
+                Fragment fragment  = fm.findFragmentById(R.id.container_word);
+                if (fragment != null){
+                    Log.d("reloadInfo", fragment.getClass().getSimpleName());
+                    if (fragment instanceof WordRecitationWelcomeFragment){
+                        WordRecitationWelcomeFragment wordRecitationWelcomeFragment = (WordRecitationWelcomeFragment) fragment;
+                        wordRecitationWelcomeFragment.updateTodayStats();
+                        Log.d("reloadInfo", "word ");
+                    }
+                }
             } else if (item.getItemId() == R.id.nav_focus_mode) {
-                showModule(containerFocus, new FocusModeFragment());
+                showModule(containerFocus);
+                // 检测当前容器中的fragment是否为time fragment页面，是则刷新数据
+                Fragment fragment = fm.findFragmentById(R.id.container_focus);
+                if (fragment != null){
+                    Log.d("reloadInfo", fragment.getClass().getSimpleName());
+                    if (fragment instanceof FocusModeFragment){
+                        FocusModeFragment focusModeFragment = (FocusModeFragment) fragment;
+                        focusModeFragment.updateTotalFocusTimeDisplay();
+                        Log.d("reloadInfo", "time ");
+                    }
+                }
             } else if (item.getItemId() == R.id.nav_community) {
-                boolean isLoggedIn = checkUserLoginStatus();
-                Fragment fragment = isLoggedIn ? new DataSyncFragment() : new CommunityFragment();
-                showModule(containerCommunity, fragment);
+                showModule(containerCommunity);
             }
             return true;
         });
     }
 
     // 核心方法：显示指定模块并维护其栈
-    private void showModule(FragmentContainerView container, Fragment fragment) {
-        FragmentManager fm = getSupportFragmentManager();
-
+    private void showModule(FragmentContainerView container) {
         // 隐藏所有容器
         for (int id : new int[]{R.id.container_word, R.id.container_focus, R.id.container_community}) {
             Fragment frag = fm.findFragmentById(id);
@@ -120,6 +137,7 @@ public class MainActivity extends AppCompatActivity {
         if (container != null) {
             container.setVisibility(View.VISIBLE);
         }
+
     }
 
     @Override

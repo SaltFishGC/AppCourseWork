@@ -20,9 +20,11 @@ import android.provider.Settings;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
+import android.widget.Button;
 import android.widget.TextView;
 import android.widget.Toast;
 
+import androidx.annotation.Nullable;
 import androidx.appcompat.app.AlertDialog;
 import androidx.fragment.app.Fragment;
 import androidx.lifecycle.ViewModelProvider;
@@ -89,6 +91,8 @@ public class FocusModeFragment extends Fragment {
         }
     };
 
+
+
     @Override
     public View onCreateView(LayoutInflater inflater, ViewGroup container, Bundle savedInstanceState) {
         View view = inflater.inflate(R.layout.fragment_focus_mode, container, false);
@@ -139,6 +143,9 @@ public class FocusModeFragment extends Fragment {
 
         // 设置模式切换按钮点击事件
         modeSwitchButton.setOnClickListener(v -> switchMode());
+
+        // 设置静音模式切换按钮点击事件
+        silentSwitch.setOnCheckedChangeListener((buttonView, isChecked) -> switchSilentMode(isChecked));
     }
 
     private void startFocusMode() {
@@ -148,11 +155,17 @@ public class FocusModeFragment extends Fragment {
         } else {
             remainingSeconds = 0;
         }
-        
+
         // 启动服务
         Intent intent = new Intent(getActivity(), FocusModeService.class);
         intent.putExtra("duration", isCountdownMode ? remainingSeconds : -1);
-        getActivity().startService(intent);
+
+        if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.O) {
+            getActivity().startForegroundService(intent);
+        } else {
+            getActivity().startService(intent);
+        }
+
         getActivity().bindService(intent, connection, Context.BIND_AUTO_CREATE);
         
         // 设置静音模式
@@ -235,6 +248,28 @@ public class FocusModeFragment extends Fragment {
             durationSlider.setVisibility(View.GONE);
             durationText.setVisibility(View.GONE);
             updateTimerDisplay(0);
+        }
+    }
+
+    private void switchSilentMode(boolean isChecked) {
+        if (isRunning) {
+            if (isChecked) {
+                // 开启静音
+                checkAndRequestNotificationPolicyPermission(() -> {
+                    AudioManager audioManager = (AudioManager) requireContext().getSystemService(Context.AUDIO_SERVICE);
+                    if (audioManager != null) {
+                        audioManager.setRingerMode(AudioManager.RINGER_MODE_SILENT);
+                    }
+                });
+            } else {
+                // 关闭静音，恢复铃声
+                checkAndRequestNotificationPolicyPermission(() -> {
+                    AudioManager audioManager = (AudioManager) requireContext().getSystemService(Context.AUDIO_SERVICE);
+                    if (audioManager != null) {
+                        audioManager.setRingerMode(AudioManager.RINGER_MODE_NORMAL);
+                    }
+                });
+            }
         }
     }
 
@@ -406,4 +441,26 @@ public class FocusModeFragment extends Fragment {
             isBound = false;
         }
     }
+    @Override
+    public void onResume() {
+        super.onResume();
+        if (!isBound && focusModeService == null) {
+            bindService(); // 重新绑定服务
+        }
+    }
+    private void bindService() {
+        Intent intent = new Intent(getActivity(), FocusModeService.class);
+        getActivity().bindService(intent, connection, Context.BIND_AUTO_CREATE);
+    }
+    @Override
+    public void onStop() {
+        super.onStop();
+        if (isBound) {
+            getActivity().unbindService(connection);
+            isBound = false;
+        }
+    }
+
+
+
 } 

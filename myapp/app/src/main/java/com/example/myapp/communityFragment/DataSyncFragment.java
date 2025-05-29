@@ -364,17 +364,6 @@ public class DataSyncFragment extends Fragment {
             try {
                 List<Integer> rememberedWordIds = wordLearningRecordDao.getAllRememberedWordIds();
                 wordDao.updateRememberedStatus(rememberedWordIds);
-                    FocusModeFragment focusModeFragment = (FocusModeFragment) requireActivity().getSupportFragmentManager().findFragmentByTag("time");
-                    if (focusModeFragment != null) {
-                        Log.d("done", "syncDataFromServer:");
-                        focusModeFragment.updateTotalFocusTimeDisplay();
-                    }
-                    WordRecitationWelcomeFragment wordRecitationFragment = (WordRecitationWelcomeFragment) requireActivity().getSupportFragmentManager().findFragmentByTag("word");
-                    if (wordRecitationFragment != null) {
-                        Log.d("done", "syncDataFromServer:");
-                        wordRecitationFragment.updateTodayStats();
-                    }
-                Log.d("done", "同步完成");
             } catch (Exception e) {
                 Log.e("DataSyncFragment", "数据库更新失败", e);
             }

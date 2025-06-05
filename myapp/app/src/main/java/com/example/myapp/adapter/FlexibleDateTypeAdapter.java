@@ -14,7 +14,7 @@ import java.util.TimeZone;
 public class FlexibleDateTypeAdapter extends TypeAdapter<Date> {
     private final SimpleDateFormat sdf = new SimpleDateFormat("yyyy-MM-dd");
     {
-        sdf.setTimeZone(TimeZone.getTimeZone("Asia/Shanghai")); // 使用 UTC 时区
+        sdf.setTimeZone(TimeZone.getTimeZone("Asia/Shanghai"));
     }
     @Override
     public void write(JsonWriter out, Date value) throws IOException {

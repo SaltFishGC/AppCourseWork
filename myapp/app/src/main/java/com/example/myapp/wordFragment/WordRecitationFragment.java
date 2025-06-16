@@ -37,7 +37,7 @@ public class WordRecitationFragment extends Fragment {
     private WordDao wordDao;
     private WordLearningRecordDao learningRecordDao;
     private List<Word> wordList;
-    private List<Word> reviewList;
+//    private List<Word> reviewList;
     private int currentIndex;
     private int totalWords;
     private int completedWords;
@@ -119,7 +119,7 @@ public class WordRecitationFragment extends Fragment {
     // 加载单词
     private void loadWords() {
         wordList = wordDao.getRandomUnrememberedWords();
-        reviewList = new ArrayList<>();
+//        reviewList = new ArrayList<>();
         currentIndex = 0;
         totalWords = wordList.size();
         completedWords = 0;
@@ -137,16 +137,17 @@ public class WordRecitationFragment extends Fragment {
     // 处理单词响应
     private void handleWordResponse(int response) {
         if (currentIndex >= totalWords) {
-            if (reviewList.isEmpty()) {
-                // 所有单词都已记住，返回欢迎页面
-                returnToWelcomeFragment();
-                return;
-            } else {
-                // 还有需要复习的单词
-                wordList = new ArrayList<>(reviewList);
-                reviewList.clear();
-                currentIndex = 0;
-            }
+//            if (reviewList.isEmpty()) {
+//                // 所有单词都已记住，返回欢迎页面
+//                returnToWelcomeFragment();
+//                return;
+//            } else {
+//                // 还有需要复习的单词
+//                wordList = new ArrayList<>(reviewList);
+//                reviewList.clear();
+//                currentIndex = 0;
+//            }
+            returnToWelcomeFragment();
         }
 
         Word currentWord = wordList.get(currentIndex);
@@ -154,28 +155,30 @@ public class WordRecitationFragment extends Fragment {
         switch (response) {
             case 0: // 没见过
             case 1: // 忘记
-                reviewList.add(currentWord);
+                wordList.remove(currentWord);
+                wordList.add(9, currentWord);
+//                reviewList.add(currentWord);
                 break;
             case 2: // 记得
                 wordDao.updateRememberedStatus(currentWord.getId(), 1); // 更新单词记住状态
                 learningRecordDao.addLearningRecord(currentWord.getId()); // 添加学习记录
                 completedWords++;
+                currentIndex++;
                 break;
         }
-
-        currentIndex++;
         
         if (currentIndex >= totalWords) {
-            if (reviewList.isEmpty()) {
-                // 所有单词都已记住，返回欢迎页面
-                returnToWelcomeFragment();
-                return;
-            } else {
-                // 还有需要复习的单词
-                wordList = new ArrayList<>(reviewList);
-                reviewList.clear();
-                currentIndex = 0;
-            }
+//            if (reviewList.isEmpty()) {
+//                // 所有单词都已记住，返回欢迎页面
+//                returnToWelcomeFragment();
+//                return;
+//            } else {
+//                // 还有需要复习的单词
+//                wordList = new ArrayList<>(reviewList);
+//                reviewList.clear();
+//                currentIndex = 0;
+//            }
+            returnToWelcomeFragment();
         }
         
         updateWordDisplay();

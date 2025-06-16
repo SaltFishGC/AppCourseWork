@@ -125,7 +125,7 @@ public class CommunityRegisterFragment extends Fragment {
             @Override
             public void onResponse(@NonNull Call call, @NonNull Response response) throws IOException {
                 String json = response.body().string();
-                requireActivity().runOnUiThread(() -> {
+//                requireActivity().runOnUiThread(() -> {
                     if (response.isSuccessful()) {
                         try {
                             Gson gson = new Gson();
@@ -133,22 +133,22 @@ public class CommunityRegisterFragment extends Fragment {
                             }.getType());
                             if (registerResponse.isSuccess()) {
                                 saveUserId(registerResponse.getData());
-                                Toast.makeText(getContext(), "注册成功", Toast.LENGTH_SHORT).show();
+                                requireActivity().runOnUiThread(()->Toast.makeText(getContext(), "注册成功", Toast.LENGTH_SHORT).show());
                                 FragmentTransaction transaction = requireActivity().getSupportFragmentManager().beginTransaction();
                                 transaction.replace(R.id.container_community, new DataSyncFragment());
                                 transaction.addToBackStack(null);
                                 transaction.commit();
                             }else {
-                                Toast.makeText(getContext(), "注册失败: " + registerResponse.getMessage(), Toast.LENGTH_SHORT).show();
+                                requireActivity().runOnUiThread(()->Toast.makeText(getContext(), "注册失败: " + registerResponse.getMessage(), Toast.LENGTH_SHORT).show());
                             }
                         } catch (Exception e) {
-                            Toast.makeText(getContext(), "解析失败" + e.getMessage(), Toast.LENGTH_SHORT).show();
+                            requireActivity().runOnUiThread(()->Toast.makeText(getContext(), "解析失败" + e.getMessage(), Toast.LENGTH_SHORT).show());
                         }
                     } else {
-                        Toast.makeText(getContext(), "请求失败: " + request, Toast.LENGTH_SHORT).show();
+                        requireActivity().runOnUiThread(()->Toast.makeText(getContext(), "请求失败: " + request, Toast.LENGTH_SHORT).show());
                         Log.d("registerFail", "detail: " + username + " " + password);
                     }
-                });
+//                });
             }
 
             @Override

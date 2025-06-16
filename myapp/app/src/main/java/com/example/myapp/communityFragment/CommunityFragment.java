@@ -171,7 +171,7 @@ public class CommunityFragment extends Fragment {
             @Override
             public void onResponse(Call call, okhttp3.Response response) throws IOException {
                 String json = response.body().string();
-                requireActivity().runOnUiThread(() -> {
+//                requireActivity().runOnUiThread(() -> {
                     if (response.isSuccessful()) {
                         try {
                             Gson gson = new Gson();
@@ -180,23 +180,23 @@ public class CommunityFragment extends Fragment {
                             if (loginResponse.isSuccess()) {
                                 Integer userId = (Integer) loginResponse.getData();
                                 saveUserId(userId);
-                                Toast.makeText(getContext(), "登录成功", Toast.LENGTH_SHORT).show();
+                                requireActivity().runOnUiThread(()->Toast.makeText(getContext(), "登录成功", Toast.LENGTH_SHORT).show());
                                 FragmentTransaction transaction = requireActivity().getSupportFragmentManager().beginTransaction();
                                 transaction.replace(R.id.container_community, new DataSyncFragment());
                                 transaction.addToBackStack(null);
                                 transaction.commit();
                             } else {
-                                Toast.makeText(getContext(), "登录失败: " + loginResponse.getMessage(), Toast.LENGTH_SHORT).show();
+                                requireActivity().runOnUiThread(()->Toast.makeText(getContext(), "登录失败: " + loginResponse.getMessage(), Toast.LENGTH_SHORT).show());
                                 Log.d("detail", "detali: "+username+" "+password);
                             }
                         } catch (Exception e) {
                             e.printStackTrace();
-                            Toast.makeText(getContext(), "解析响应失败", Toast.LENGTH_SHORT).show();
+                            requireActivity().runOnUiThread(()->Toast.makeText(getContext(), "解析响应失败", Toast.LENGTH_SHORT).show());
                         }
                     } else {
-                        Toast.makeText(getContext(), "请求失败: " + response.message(), Toast.LENGTH_SHORT).show();
+                        requireActivity().runOnUiThread(()->Toast.makeText(getContext(), "请求失败: " + response.message(), Toast.LENGTH_SHORT).show());
                     }
-                });
+//                });
             }
         });
     }

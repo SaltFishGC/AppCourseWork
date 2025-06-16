@@ -27,7 +27,7 @@ public class ConnectSet {
     }
 
     /**
-     * 获取服务器 IP 地址=
+     * 获取服务器 IP 地址
      */
     public static String getServerIp(Context context) {
         return getSharedPreferences(context).getString(KEY_SERVER_IP, context.getString(R.string.server_ip));
